@@ -10,9 +10,13 @@ def random_pos_grid():
     return (x//20*20, y//20*20)
 
 
+def collision(obj1, obj2):
+    return (obj1[0] == obj2[0]) and (obj1[1] == obj2[1])
+
+
 pygame.init()
 
-SCALE = 19
+SCALE = 20
 SPEED = 20
 WIDTH = 600
 HEIGHT = 600
@@ -30,8 +34,8 @@ clock = pygame.time.Clock()
 tick = 10
 
 center_canvas = (WIDTH//2, HEIGHT//2)
-snake_pos = [center_canvas, center_canvas, center_canvas]
-snake = pygame.Surface((SCALE, SCALE))
+snake_pos = [center_canvas, center_canvas, center_canvas, center_canvas]
+snake = pygame.Surface((SCALE-1, SCALE-1))
 snake.fill('green')
 
 apple_pos = random_pos_grid()
@@ -50,15 +54,16 @@ while not done:
             if event.key == K_ESCAPE:
                 done = True
 
-            if event.key in [K_UP, K_w]:
+            if event.key in [K_UP, K_w] and current_direction != DOWN:
                 current_direction = UP
-            if event.key in [K_DOWN, K_s]:
+            if event.key in [K_DOWN, K_s] and current_direction != UP:
                 current_direction = DOWN
-            if event.key in [K_LEFT, K_a]:
+            if event.key in [K_LEFT, K_a] and current_direction != RIGHT:
                 current_direction = LEFT
-            if event.key in [K_RIGHT, K_d]:
+            if event.key in [K_RIGHT, K_d] and current_direction != LEFT:
                 current_direction = RIGHT
 
+    # Moviment logic
     if current_direction == UP:
         snake_pos[0] = (snake_pos[0][0], snake_pos[0][1]-SPEED)
     if current_direction == DOWN:
@@ -68,6 +73,21 @@ while not done:
     if current_direction == RIGHT:
         snake_pos[0] = (snake_pos[0][0]+SPEED, snake_pos[0][1])
 
+    # Collision logic
+    if snake_pos[0][0] < 0:
+        snake_pos[0] = (WIDTH-SCALE, snake_pos[0][1])
+    if snake_pos[0][0] > WIDTH-SCALE:
+        snake_pos[0] = (0, snake_pos[0][1])
+    if snake_pos[0][1] < 0:
+        snake_pos[0] = (snake_pos[0][0], HEIGHT-SCALE)
+    if snake_pos[0][1] > HEIGHT-SCALE:
+        snake_pos[0] = (snake_pos[0][0], 0)
+
+    if collision(snake_pos[0], apple_pos):
+        snake_pos.append((0, 0))
+        apple_pos = random_pos_grid()
+
+    # Snake body logic
     for i in range(len(snake_pos)-1, 0, -1):
         snake_pos[i] = (snake_pos[i-1][0], snake_pos[i-1][1])
 
