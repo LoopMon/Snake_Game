@@ -25,6 +25,15 @@ DOWN = 1
 LEFT = 2
 RIGHT = 3
 
+game_states = {
+    'home': 0,
+    'play': 1,
+    'options': 2,
+    'credits': 3,
+    'pause': 4
+}
+game_state = 1
+
 current_direction = DOWN
 
 canvas = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -56,6 +65,13 @@ while not done:
         if event.type == KEYDOWN:
             if event.key == K_ESCAPE:
                 done = True
+            if event.key == K_p:
+                if game_states['play'] == game_state:            
+                    game_state = 4
+                    SPEED = 0
+                else:
+                    game_state = 1
+                    SPEED = 20
 
             if event.key in [K_UP, K_w] and current_direction != DOWN:
                 current_direction = UP
@@ -92,14 +108,21 @@ while not done:
         apple_pos = random_pos_grid()
 
     # Snake body logic
-    for i in range(len(snake_pos)-1, 0, -1):
-        snake_pos[i] = (snake_pos[i-1][0], snake_pos[i-1][1])
+    if game_states['play'] == game_state:
+        for i in range(len(snake_pos)-1, 0, -1):
+            snake_pos[i] = (snake_pos[i-1][0], snake_pos[i-1][1])
 
     for pos in snake_pos:
         canvas.blit(snake, pos)
 
     # Render Text - Score
     font_score = font.render(f'Score: {score}', True, ('gray'))
+
+    if game_states['pause'] == game_state:
+        font_pause = font.render('Game Paused', True, ('white'))
+        font_rect = font_pause.get_rect()
+        font_rect.center = center_canvas
+        canvas.blit(font_pause, font_rect)
 
     canvas.blit(font_score, (10, 10))
     canvas.blit(apple, apple_pos)
