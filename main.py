@@ -1,18 +1,27 @@
 import pygame
+from random import randint
 from pygame.locals import *
+
+
+def random_pos_grid():
+    x = randint(0, WIDTH-10)
+    y = randint(0, HEIGHT-10)
+
+    return (x//20*20, y//20*20)
 
 
 pygame.init()
 
 SCALE = 19
-WIDTH = 500
-HEIGHT = 500
+SPEED = 20
+WIDTH = 600
+HEIGHT = 600
 UP = 0
 DOWN = 1
 LEFT = 2
 RIGHT = 3
+
 current_direction = DOWN
-SPEED = 20
 
 canvas = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption('Snake Game')
@@ -24,6 +33,10 @@ center_canvas = (WIDTH//2, HEIGHT//2)
 snake_pos = [center_canvas, center_canvas, center_canvas]
 snake = pygame.Surface((SCALE, SCALE))
 snake.fill('green')
+
+apple_pos = random_pos_grid()
+apple = pygame.Surface((SCALE, SCALE))
+apple.fill('red')
 
 done = False
 while not done:
@@ -60,6 +73,8 @@ while not done:
 
     for pos in snake_pos:
         canvas.blit(snake, pos)
+    
+    canvas.blit(apple, apple_pos)
 
     pygame.display.update()
 
