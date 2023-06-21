@@ -30,6 +30,9 @@ current_direction = DOWN
 canvas = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption('Snake Game')
 
+font = pygame.font.Font('fonts/Roboto-Regular.ttf', 24)
+score = 0
+
 clock = pygame.time.Clock()
 tick = 10
 
@@ -85,6 +88,7 @@ while not done:
 
     if collision(snake_pos[0], apple_pos):
         snake_pos.append((0, 0))
+        score += 1
         apple_pos = random_pos_grid()
 
     # Snake body logic
@@ -93,7 +97,11 @@ while not done:
 
     for pos in snake_pos:
         canvas.blit(snake, pos)
-    
+
+    # Render Text - Score
+    font_score = font.render(f'Score: {score}', True, ('gray'))
+
+    canvas.blit(font_score, (10, 10))
     canvas.blit(apple, apple_pos)
 
     pygame.display.update()
