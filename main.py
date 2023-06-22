@@ -72,14 +72,12 @@ while not done:
 
         if event.type == KEYDOWN:
             if game_states['home'] == game_state:
-                if event.key == K_ESCAPE:
-                    done = True
-                if event.key == K_RETURN and game_menu[current_menu][0] == 'exit':
-                    done = True
                 if event.key == K_RETURN and game_menu[current_menu][0] == 'play':
                     game_state = 1
+                if event.key == K_RETURN and game_menu[current_menu][0] == 'exit':
+                    done = True
 
-                if event.key == K_w:
+                if event.key in [K_UP, K_w]:
                     if current_menu == 0:
                         current_menu = max_menu_itens-1
                         game_menu[current_menu][2] = True
@@ -89,7 +87,7 @@ while not done:
                         game_menu[current_menu+1][2] = False
                         game_menu[current_menu][2] = True
 
-                if event.key == K_s:
+                if event.key in [K_DOWN, K_s]:
                     current_menu += 1
                     if current_menu < max_menu_itens:
                         game_menu[current_menu-1][2] = False
@@ -99,38 +97,43 @@ while not done:
                         current_menu = 0
                         game_menu[current_menu][2] = True
 
-            if event.key == K_p and game_states['home'] != game_state and game_states['play'] == game_state:
-                if not game_paused:            
-                    game_paused = True
-                    SPEED = 0
-                else:
+            if game_states['play'] == game_state:
+                if event.key == K_p:
+                    if not game_paused:            
+                        game_paused = True
+                        SPEED = 0
+                    else:
+                        game_paused = False
+                        SPEED = 20
+
+                if not game_paused:
+                    if event.key in [K_UP, K_w] and current_direction != DOWN:
+                        current_direction = UP
+                    if event.key in [K_DOWN, K_s] and current_direction != UP:
+                        current_direction = DOWN
+                    if event.key in [K_LEFT, K_a] and current_direction != RIGHT:
+                        current_direction = LEFT
+                    if event.key in [K_RIGHT, K_d] and current_direction != LEFT:
+                        current_direction = RIGHT
+                    
+                if event.key == K_ESCAPE and game_paused:
+                    game_state = 0
                     game_paused = False
                     SPEED = 20
 
-            if game_states['play'] == game_state and not game_paused:
-
-                if event.key in [K_UP, K_w] and current_direction != DOWN:
-                    current_direction = UP
-                if event.key in [K_DOWN, K_s] and current_direction != UP:
-                    current_direction = DOWN
-                if event.key in [K_LEFT, K_a] and current_direction != RIGHT:
-                    current_direction = LEFT
-                if event.key in [K_RIGHT, K_d] and current_direction != LEFT:
-                    current_direction = RIGHT
-
     if game_states['home'] == game_state:
-        for item in game_menu:
-            if item[2]:
+        for txt, pos, actived in game_menu:
+            if actived:
                 font = pygame.font.Font('fonts/Roboto-Regular.ttf', 36)
-                font_menu = font.render(f'<< {item[0].upper()} >>', True, ('yellow'))
+                font_menu = font.render(f'<< {txt.upper()} >>', True, ('yellow'))
                 font_rect = font_menu.get_rect()
-                font_rect.center = item[1]
+                font_rect.center = pos
                 canvas.blit(font_menu, font_rect)
             else:
                 font = pygame.font.Font('fonts/Roboto-Regular.ttf', 36)
-                font_menu = font.render(f'{item[0].upper()}', True, ('white'))
+                font_menu = font.render(f'{txt.upper()}', True, ('white'))
                 font_rect = font_menu.get_rect()
-                font_rect.center = item[1]
+                font_rect.center = pos
                 canvas.blit(font_menu, font_rect)
 
     if game_states['play'] == game_state:
@@ -179,6 +182,10 @@ while not done:
         font_rect = font_pause.get_rect()
         font_rect.center = center_canvas
         canvas.blit(font_pause, font_rect)
+
+        font = pygame.font.Font('fonts/Roboto-Regular.ttf', 24)
+        font_back = font.render('[Esc] Back', True, ('white'))
+        canvas.blit(font_back, (20, HEIGHT-40))
 
     pygame.display.update()
 
