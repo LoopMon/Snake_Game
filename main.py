@@ -11,7 +11,7 @@ SPEED = 20
 WIDTH = 600
 HEIGHT = 600
 
-current_direction = 1
+current_direction = 1 # DOWN
 
 game_states = {
     'home': 0,
@@ -31,6 +31,41 @@ game_menu = [
 current_menu = 0
 max_menu_itens = len(game_menu)
 
+area1 = pygame.Rect(0, 80, WIDTH//2, HEIGHT//4)
+area2 = pygame.Rect(area1.w, 80, WIDTH//2, HEIGHT//4)
+area3 = pygame.Rect(0, area1.y+area1.h, WIDTH//2, HEIGHT//4)
+area4 = pygame.Rect(0, area3.y+area3.h, WIDTH//2, HEIGHT//4)
+
+snake_colors = [
+    [pygame.Rect(area1.x+10, area1.y+50, 40, 30), ('green'), True],
+    [pygame.Rect(area1.x+60, area1.y+50, 40, 30), ('blue'), False],
+    [pygame.Rect(area1.x+110, area1.y+50, 40, 30), ('yellow'), False],
+    [pygame.Rect(area1.x+10, area1.y+90, 40, 30), ('red'), False],
+    [pygame.Rect(area1.x+60, area1.y+90, 40, 30), ('purple'), False],
+    [pygame.Rect(area1.x+110, area1.y+90, 40, 30), ('white'), False],
+]
+current_snake_color = 0
+
+apple_colors = [
+    [pygame.Rect(area2.x+10, area2.y+50, 40, 30), ('green'), False],
+    [pygame.Rect(area2.x+60, area2.y+50, 40, 30), ('blue'), False],
+    [pygame.Rect(area2.x+110, area2.y+50, 40, 30), ('yellow'), False],
+    [pygame.Rect(area2.x+10, area2.y+90, 40, 30), ('red'), True],
+    [pygame.Rect(area2.x+60, area2.y+90, 40, 30), ('purple'), False],
+    [pygame.Rect(area2.x+110, area2.y+90, 40, 30), ('white'), False],
+]
+current_apple_color = 3
+
+volume_bar = pygame.Rect(10, area3.y+80, WIDTH//2-40, 5)
+volume_switch = pygame.Rect(10+volume_bar.w//2, area3.y+68, 5, 30)
+volume_count = 2.5
+
+buttons_mode = [
+    [pygame.Rect(10, area4.y+70, 150, 50), 'Pacific', True],
+    [pygame.Rect(area4.x+area4.w+10, area4.y+70, 150, 50), 'Normal', False]
+]
+current_mode = 0
+
 canvas = pygame.display.set_mode((WIDTH, HEIGHT))
 icon = pygame.image.load('img/apple_icon.png')
 img_home = pygame.image.load('img/snake_new.png')
@@ -39,6 +74,8 @@ pygame.display.set_caption('Snake Game')
 pygame.display.set_icon(icon)
 
 score = 0
+posX, posY = 0, 0
+mouse_left_click = False
 
 clock = pygame.time.Clock()
 tick = 10
@@ -46,11 +83,11 @@ tick = 10
 center_canvas = (WIDTH//2, HEIGHT//2)
 snake_pos = [center_canvas, center_canvas, center_canvas, center_canvas]
 snake = pygame.Surface((SCALE-1, SCALE-1))
-snake.fill('green')
+snake.fill(snake_colors[current_snake_color][1])
 
 apple_pos = random_pos_grid(canvas)
-apple = pygame.Surface((SCALE, SCALE))
-apple.fill('red')
+apple = pygame.Surface((SCALE-1, SCALE-1))
+apple.fill(apple_colors[current_apple_color][1])
 
 done = False
 while not done:
@@ -64,6 +101,12 @@ while not done:
             if game_states['home'] == game_state:
                 if event.key == K_RETURN and game_menu[current_menu][0] == 'play':
                     game_state = 1
+
+                if event.key == K_RETURN and game_menu[current_menu][0] == 'options':
+                    game_state = 2
+                
+                if event.key == K_RETURN and game_menu[current_menu][0] == 'credits':
+                    print('credits')
 
                 if event.key == K_RETURN and game_menu[current_menu][0] == 'exit':
                     done = True
@@ -104,6 +147,27 @@ while not done:
                     game_state = 0
                     game_paused = False
                     SPEED = 20
+
+            if game_states['options'] == game_state:
+                if event.key == K_ESCAPE:
+                    game_state = 0
+
+        if event.type == MOUSEBUTTONDOWN and pygame.mouse.get_pressed()[0]:
+            posX, posY = pygame.mouse.get_pos()
+            for c, item in enumerate(snake_colors):
+                if item[0].collidepoint(posX, posY):
+                    current_snake_color = c
+                else:
+                    item[2] = False
+
+            for c, item in enumerate(apple_colors):
+                if item[0].collidepoint(posX, posY):
+                    current_apple_color = c
+                else:
+                    item[2] = False
+
+        if event.type == MOUSEBUTTONUP:
+            mouse_left_click = False
 
     if game_states['home'] == game_state:
         canvas.blit(img_home, (WIDTH//2-90, 20))
@@ -147,6 +211,89 @@ while not done:
         font = pygame.font.Font('fonts/Roboto-Regular.ttf', 24)
         font_back, font_rect = drawText(font, '[Esc] Back', (20, HEIGHT-40))
         canvas.blit(font_back, font_rect)
+
+    if game_states['options'] == game_state:
+        # TITULO DA AREA - OPTIONS
+        font = pygame.font.Font('fonts/Roboto-Regular.ttf', 40)
+        font_options = font.render('Options', True, ('white'))
+        font_rect = font_options.get_rect()
+        font_rect.center = (WIDTH//2, 30)
+        canvas.blit(font_options, font_rect)
+
+        # Area para as cores da snake
+        font = pygame.font.Font('fonts/Roboto-Regular.ttf', 32)
+        font_snake_colors = font.render('Snake Colors:', True, ('white'))
+        font_rect = font_snake_colors.get_rect()
+        font_rect.topleft = (area1.x+10, area1.y+10)
+        canvas.blit(font_snake_colors, font_rect)
+
+        snake_colors[current_snake_color][2] = True
+
+        for rect, color, active in snake_colors:
+            if active:
+                pygame.draw.rect(canvas, color, rect)
+                pygame.draw.rect(canvas, ('white'), rect, 4)
+            else: 
+                pygame.draw.rect(canvas, color, rect)
+
+        # Area para as cores da maçã
+        apple_colors[current_apple_color][2] = True
+
+        font_apple_colors = font.render('Apple Colors:', True, ('white'))
+        font_rect = font_apple_colors.get_rect()
+        font_rect.topleft = (area2.x+10, area2.y+10)
+        canvas.blit(font_apple_colors, font_rect)
+
+        for rect, color, active in apple_colors:
+            if active:
+                pygame.draw.rect(canvas, color, rect)
+                pygame.draw.rect(canvas, ('white'), rect, 4)
+            else: 
+                pygame.draw.rect(canvas, color, rect)
+
+        # Area para o volume do jogo
+        font_game_volume = font.render('Game Volume:', True, ('white'))
+        font_rect = font_game_volume.get_rect()
+        font_rect.topleft = (area3.x+10, area3.y+10)
+        canvas.blit(font_game_volume, font_rect)
+
+        pygame.draw.rect(canvas, ('white'), volume_bar)        
+        pygame.draw.rect(canvas, ('blue'), volume_switch)
+
+        font = pygame.font.Font('fonts/Roboto-Regular.ttf', 20)
+        font_volume = font.render(f'{volume_count}', True, ('white'))
+        font_rect = font_volume.get_rect()
+        font_rect.topleft = (volume_bar.x+volume_bar.w+25, volume_bar.y-9)
+        canvas.blit(font_volume, font_rect)
+
+        # Area para o modo de jogo
+        font = pygame.font.Font('fonts/Roboto-Regular.ttf', 32)
+        font_game_mode = font.render('Game Mode:', True, ('white'))
+        font_rect = font_game_mode.get_rect()
+        font_rect.topleft = (area4.x+10, area4.y+10)
+        canvas.blit(font_game_mode, font_rect)
+
+        for rect, txt, active in buttons_mode:
+            if active:
+                font = pygame.font.Font('fonts/Roboto-Regular.ttf', 24)
+                font_txt = font.render(txt, True, ('green'))
+                pygame.draw.rect(canvas, ('green'), rect, 4)
+                canvas.blit(font_txt, (rect.x+20, rect.y+10))
+            else:
+                font = pygame.font.Font('fonts/Roboto-Regular.ttf', 24)
+                font_txt = font.render(txt, True, ('white'))
+                pygame.draw.rect(canvas, ('white'), rect, 4)
+                canvas.blit(font_txt, (rect.x+20, rect.y+10))
+
+        font = pygame.font.Font('fonts/Roboto-Regular.ttf', 24)
+        font_back = font.render('[Esc] Back', True, ('white'))
+        font_rect = font_back.get_rect()
+        font_rect.bottomleft = (20, HEIGHT-20)
+        canvas.blit(font_back, font_rect)
+
+        snake.fill(snake_colors[current_snake_color][1])
+        apple.fill(apple_colors[current_apple_color][1])
+
 
     pygame.display.update()
 
