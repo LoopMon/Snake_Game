@@ -1,12 +1,12 @@
 # Snake Game feito com Python e Pygame
 
 ## Tela inicial do Jogo:
-<center>
+
+<div align="center">
 
 <img alt="home page" src="img/home_game.jpg" width="300">
 
-
-</center>
+</div>
 
 ---
 
@@ -19,15 +19,17 @@
 --- 
 
 ### O `play` inicia o jogo da snake:
-<center>
+<div align="center">
 
 <img alt="play page" src="img/play_game.jpg" width="300">
 
-</center>
+</div>
 
 ### O `options` abre as configurações do jogo:
 
-    em breve ⏱
+<div align="center">
+    <img alt="option page" src="img/options.jpg" width="300">
+</div>
 
 ### O `credits` mostra os créditos ao criador do jogo:
 
