@@ -11,10 +11,10 @@
 ---
 
 ### A tela inicial do jogo é compostar por 4 itens:
-- PLAY
-- OPTIONS
-- CREDITS
-- EXIT
+- <kbd>PLAY</kbd>
+- <kbd>OPTIONS</kbd>
+- <kbd>CREDITS</kbd>
+- <kbd>EXIT</kbd>
 
 --- 
 
