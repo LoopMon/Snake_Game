@@ -58,7 +58,9 @@ current_apple_color = 3
 
 volume_bar = pygame.Rect(10, area3.y+80, WIDTH//2-40, 5)
 volume_switch = pygame.Rect(10+volume_bar.w//2, area3.y+68, 5, 30)
-volume_count = 2.5
+volume_count = 0.5
+pygame.mixer.music.load('audio/menu_som.mp3')
+pygame.mixer.music.set_volume(volume_count)
 
 buttons_mode = [
     [pygame.Rect(10, area4.y+70, 150, 50), 'Pacific', True],
@@ -100,9 +102,12 @@ while not done:
         if event.type == KEYDOWN:
             if game_states['home'] == game_state:
                 if event.key == K_RETURN and game_menu[current_menu][0] == 'play':
+                    pygame.mixer.music.load('audio/comer.mp3')
+                    tick = 10
                     game_state = 1
 
                 if event.key == K_RETURN and game_menu[current_menu][0] == 'options':
+                    tick = 60
                     game_state = 2
                 
                 if event.key == K_RETURN and game_menu[current_menu][0] == 'credits':
@@ -113,10 +118,12 @@ while not done:
 
                 if event.key in [K_UP, K_w]:
                     if current_menu == 0:
+                        pygame.mixer.music.play()
                         current_menu = max_menu_itens-1
                         game_menu[current_menu][2] = True
                         game_menu[0][2] = False
                     else:
+                        pygame.mixer.music.play()
                         current_menu -= 1
                         game_menu[current_menu+1][2] = False
                         game_menu[current_menu][2] = True
@@ -124,9 +131,11 @@ while not done:
                 if event.key in [K_DOWN, K_s]:
                     current_menu += 1
                     if current_menu < max_menu_itens:
+                        pygame.mixer.music.play()
                         game_menu[current_menu-1][2] = False
                         game_menu[current_menu][2] = True
                     else: 
+                        pygame.mixer.music.play()
                         game_menu[current_menu-1][2] = False
                         current_menu = 0
                         game_menu[current_menu][2] = True
@@ -144,6 +153,7 @@ while not done:
                     current_direction = getDirection(event.key, current_direction)
                     
                 if event.key == K_ESCAPE and game_paused:
+                    pygame.mixer.music.load('audio/menu_som.mp3')
                     game_state = 0
                     game_paused = False
                     SPEED = 20
@@ -152,7 +162,8 @@ while not done:
                 if event.key == K_ESCAPE:
                     game_state = 0
 
-        if event.type == MOUSEBUTTONDOWN and pygame.mouse.get_pressed()[0]:
+        left_click = pygame.mouse.get_pressed()[0]
+        if event.type == MOUSEBUTTONDOWN and left_click:
             posX, posY = pygame.mouse.get_pos()
             for c, item in enumerate(snake_colors):
                 if item[0].collidepoint(posX, posY):
@@ -165,9 +176,6 @@ while not done:
                     current_apple_color = c
                 else:
                     item[2] = False
-
-        if event.type == MOUSEBUTTONUP:
-            mouse_left_click = False
 
     if game_states['home'] == game_state:
         canvas.blit(img_home, (WIDTH//2-90, 20))
@@ -186,6 +194,7 @@ while not done:
             collisionWithCanvas(canvas, snake_pos, SCALE)
 
             if collision(snake_pos[0], apple_pos):
+                pygame.mixer.music.play()
                 snake_pos.append((0, 0))
                 score += 1
                 apple_pos = random_pos_grid(canvas)
