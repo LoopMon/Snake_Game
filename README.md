@@ -9,7 +9,7 @@
 </div>
 
 
-## A tela inicial do jogo é compostar por 4 itens:
+## A tela inicial do jogo é composta por 4 itens:
 - <kbd>PLAY</kbd>
 - <kbd>OPTIONS</kbd>
 - <kbd>CREDITS</kbd>
