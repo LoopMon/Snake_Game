@@ -56,11 +56,12 @@ apple_colors = [
 ]
 current_apple_color = 3
 
-volume_bar = pygame.Rect(10, area3.y+80, WIDTH//2-40, 5)
-volume_switch = pygame.Rect(10+volume_bar.w//2, area3.y+68, 5, 30)
-volume_count = 0.5
+volume_bar = pygame.Rect(30, area3.y+80, 100, 5)
+volume_switch = pygame.Rect(volume_bar.x+volume_bar.w, volume_bar.y-13, 5, 30)
+volume_audio = 100
+
 pygame.mixer.music.load('audio/menu_som.mp3')
-pygame.mixer.music.set_volume(volume_count)
+pygame.mixer.music.set_volume(volume_audio/100)
 
 buttons_mode = [
     [pygame.Rect(10, area4.y+70, 150, 50), 'Pacific', True],
@@ -77,7 +78,8 @@ pygame.display.set_icon(icon)
 
 score = 0
 posX, posY = 0, 0
-mouse_left_click = False
+left_click = False
+collid = False
 
 clock = pygame.time.Clock()
 tick = 10
@@ -162,9 +164,18 @@ while not done:
                 if event.key == K_ESCAPE:
                     game_state = 0
 
-        left_click = pygame.mouse.get_pressed()[0]
-        if event.type == MOUSEBUTTONDOWN and left_click:
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            left_click = True
+
+        if event.type == pygame.MOUSEBUTTONUP:
+            left_click = False
+            collid = False
+
+        if event.type == pygame.MOUSEMOTION:
             posX, posY = pygame.mouse.get_pos()
+
+        if event.type == MOUSEBUTTONDOWN and left_click:
+            # posX, posY = pygame.mouse.get_pos()
             for c, item in enumerate(snake_colors):
                 if item[0].collidepoint(posX, posY):
                     current_snake_color = c
@@ -176,6 +187,21 @@ while not done:
                     current_apple_color = c
                 else:
                     item[2] = False
+        
+        if volume_switch.collidepoint(posX, posY):
+            collid = True
+
+        if collid and left_click:
+            volume_switch.x = posX - 3
+
+    
+            if volume_switch.x > volume_bar.x + volume_bar.w:
+                volume_switch.x = volume_bar.x + volume_bar.w - 3
+
+            if volume_switch.x < volume_bar.x:
+                volume_switch.x = volume_bar.x
+
+            volume_audio = volume_switch.x - volume_bar.x + 3
 
     if game_states['home'] == game_state:
         canvas.blit(img_home, (WIDTH//2-90, 20))
@@ -266,14 +292,13 @@ while not done:
         font_rect.topleft = (area3.x+10, area3.y+10)
         canvas.blit(font_game_volume, font_rect)
 
-        pygame.draw.rect(canvas, ('white'), volume_bar)        
-        pygame.draw.rect(canvas, ('blue'), volume_switch)
-
-        font = pygame.font.Font('fonts/Roboto-Regular.ttf', 20)
-        font_volume = font.render(f'{volume_count}', True, ('white'))
-        font_rect = font_volume.get_rect()
-        font_rect.topleft = (volume_bar.x+volume_bar.w+25, volume_bar.y-9)
-        canvas.blit(font_volume, font_rect)
+        pygame.draw.rect(canvas, ('white'), volume_bar)
+        pygame.draw.rect(canvas, ('green'), volume_switch)
+        font = pygame.font.Font('fonts/Roboto-Regular.ttf', 24)
+        font_volume_audio = font.render(f'{volume_audio}', True, ('white'))
+        font_rect = font_volume_audio.get_rect()
+        font_rect.topleft = (volume_bar.x + volume_bar.w + 15, volume_bar.y-10)
+        canvas.blit(font_volume_audio, font_rect)
 
         # Area para o modo de jogo
         font = pygame.font.Font('fonts/Roboto-Regular.ttf', 32)
@@ -302,6 +327,7 @@ while not done:
 
         snake.fill(snake_colors[current_snake_color][1])
         apple.fill(apple_colors[current_apple_color][1])
+        pygame.mixer.music.set_volume(volume_audio/100)
 
 
     pygame.display.update()
