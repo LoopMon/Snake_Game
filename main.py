@@ -18,6 +18,7 @@ game_states = {
     'play': 1,
     'options': 2,
     'credits': 3,
+    'gameover': 4
 }
 game_state = 0
 game_paused = False
@@ -64,10 +65,10 @@ pygame.mixer.music.load('audio/menu_som.mp3')
 pygame.mixer.music.set_volume(volume_audio/100)
 
 buttons_mode = [
-    [pygame.Rect(10, area4.y+70, 150, 50), 'Pacific', True],
-    [pygame.Rect(area4.x+area4.w+10, area4.y+70, 150, 50), 'Normal', False]
+    [pygame.Rect(10, area4.y+70, 150, 50), 'Pacific', 0],
+    [pygame.Rect(area4.x+area4.w+10, area4.y+70, 150, 50), 'Normal', 1]
 ]
-current_mode = 0
+current_mode = 1
 
 canvas = pygame.display.set_mode((WIDTH, HEIGHT))
 icon = pygame.image.load('img/apple_icon.png')
@@ -162,7 +163,18 @@ while not done:
 
             if game_states['options'] == game_state:
                 if event.key == K_ESCAPE:
+                    pygame.mixer.music.load('audio/menu_som.mp3')
                     game_state = 0
+            
+            if game_states['gameover'] == game_state:
+                if event.key == K_ESCAPE:
+                    pygame.mixer.music.load('audio/menu_som.mp3')
+                    game_state = 0
+                    snake_pos = [center_canvas, center_canvas, center_canvas, center_canvas]
+                    apple_pos = random_pos_grid(canvas)
+                    score = 0
+                    SPEED = 20
+                    current_direction = 1
 
         if event.type == pygame.MOUSEBUTTONDOWN:
             left_click = True
@@ -175,25 +187,37 @@ while not done:
             posX, posY = pygame.mouse.get_pos()
 
         if event.type == MOUSEBUTTONDOWN and left_click:
-            # posX, posY = pygame.mouse.get_pos()
             for c, item in enumerate(snake_colors):
                 if item[0].collidepoint(posX, posY):
+                    pygame.mixer.music.load('audio/button.mp3')
+                    pygame.mixer.music.play()
                     current_snake_color = c
                 else:
+                    pygame.mixer.music.load('audio/button.mp3')
+                    pygame.mixer.music.play()
                     item[2] = False
 
             for c, item in enumerate(apple_colors):
                 if item[0].collidepoint(posX, posY):
+                    pygame.mixer.music.load('audio/button.mp3')
+                    pygame.mixer.music.play()
                     current_apple_color = c
                 else:
+                    pygame.mixer.music.load('audio/button.mp3')
+                    pygame.mixer.music.play()
                     item[2] = False
+
+            for button in buttons_mode:
+                if button[0].collidepoint(posX, posY):
+                    pygame.mixer.music.load('audio/button.mp3')
+                    pygame.mixer.music.play()
+                    current_mode = button[2]
         
         if volume_switch.collidepoint(posX, posY):
             collid = True
 
         if collid and left_click:
             volume_switch.x = posX - 3
-
     
             if volume_switch.x > volume_bar.x + volume_bar.w:
                 volume_switch.x = volume_bar.x + volume_bar.w - 3
@@ -216,8 +240,9 @@ while not done:
             # Moviment logic
             moveSnake(snake_pos, current_direction, SPEED)
 
-            # Collision logic
-            collisionWithCanvas(canvas, snake_pos, SCALE)
+            if current_mode == 0:
+                # Collision logic
+                collisionWithCanvas(canvas, snake_pos, SCALE)
 
             if collision(snake_pos[0], apple_pos):
                 pygame.mixer.music.play()
@@ -225,9 +250,28 @@ while not done:
                 score += 1
                 apple_pos = random_pos_grid(canvas)
 
-            # Snake body logic
-            for i in range(len(snake_pos)-1, 0, -1):
-                snake_pos[i] = (snake_pos[i-1][0], snake_pos[i-1][1])
+            if current_mode == 1:
+                for pos in range(2, len(snake_pos)):
+                    if pygame.Rect(
+                        snake_pos[0][0], snake_pos[0][1], 19, 19
+                    ).colliderect(pygame.Rect(
+                        snake_pos[pos][0], snake_pos[pos][1], 19, 19
+                    )) and len(snake_pos) > 4:
+                        pygame.mixer.music.load('audio/game-over.mp3')
+                        pygame.mixer.music.play()
+                        game_state = 4
+                        SPEED = 0
+
+                if snake_pos[0][0] < 0 or snake_pos[0][0]+19 > WIDTH or snake_pos[0][1] < 0 or snake_pos[0][1]+19 > HEIGHT:
+                    pygame.mixer.music.load('audio/game-over.mp3')
+                    pygame.mixer.music.play()
+                    game_state = 4
+                    SPEED = 0
+
+            if game_states['gameover'] != game_state:
+                # Snake body logic  
+                for i in range(len(snake_pos)-1, 0, -1):
+                    snake_pos[i] = (snake_pos[i-1][0], snake_pos[i-1][1])
 
         for pos in snake_pos:
             canvas.blit(snake, pos)
@@ -308,7 +352,7 @@ while not done:
         canvas.blit(font_game_mode, font_rect)
 
         for rect, txt, active in buttons_mode:
-            if active:
+            if active == current_mode:
                 font = pygame.font.Font('fonts/Roboto-Regular.ttf', 24)
                 font_txt = font.render(txt, True, ('green'))
                 pygame.draw.rect(canvas, ('green'), rect, 4)
@@ -329,6 +373,25 @@ while not done:
         apple.fill(apple_colors[current_apple_color][1])
         pygame.mixer.music.set_volume(volume_audio/100)
 
+    if game_states['gameover'] == game_state:
+
+        for pos in snake_pos:
+            canvas.blit(snake, pos)
+
+        font = pygame.font.Font('fonts/Roboto-Regular.ttf', 24)
+        font_score = font.render(f'Score: {score}', True, ('gray'))
+        canvas.blit(font_score, (10, 10))
+        canvas.blit(apple, apple_pos)
+
+        pygame.draw.rect(canvas, ('red'), (snake_pos[0][0], snake_pos[0][1], 19, 19))
+
+        font = pygame.font.Font('fonts/Roboto-Regular.ttf', 48)
+        font_game_over, font_rect = drawText(font, 'Game Over', center_canvas, True)
+        canvas.blit(font_game_over, font_rect)
+
+        font = pygame.font.Font('fonts/Roboto-Regular.ttf', 24)
+        font_back, font_rect = drawText(font, '[Esc] Back', (20, HEIGHT-40))
+        canvas.blit(font_back, font_rect)
 
     pygame.display.update()
 
