@@ -30,6 +30,8 @@
 
     ### O `credits` mostra os créditos ao criador do jogo:
 
-        em breve ⏲
+    <div align="center">
+        <img alt="option page" src="img/credits.png" width="300">
+    </div>
 
     ### O `exit` apenas fecha o programa.
