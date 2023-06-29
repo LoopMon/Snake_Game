@@ -114,7 +114,7 @@ while not done:
                     game_state = 2
                 
                 if event.key == K_RETURN and game_menu[current_menu][0] == 'credits':
-                    print('credits')
+                    game_state = 3
 
                 if event.key == K_RETURN and game_menu[current_menu][0] == 'exit':
                     done = True
@@ -175,6 +175,10 @@ while not done:
                     score = 0
                     SPEED = 20
                     current_direction = 1
+
+            if game_states['credits'] == game_state:
+                if event.key == K_ESCAPE:
+                    game_state = 0
 
         if event.type == pygame.MOUSEBUTTONDOWN:
             left_click = True
@@ -391,6 +395,44 @@ while not done:
 
         font = pygame.font.Font('fonts/Roboto-Regular.ttf', 24)
         font_back, font_rect = drawText(font, '[Esc] Back', (20, HEIGHT-40))
+        canvas.blit(font_back, font_rect)
+
+    if game_states['credits'] == game_state:
+        # TITULO DA AREA - CREDITS
+        font = pygame.font.Font('fonts/Roboto-Regular.ttf', 40)
+        font_options = font.render('Credits', True, ('white'))
+        font_rect = font_options.get_rect()
+        font_rect.center = (WIDTH//2, 30)
+        canvas.blit(font_options, font_rect)
+
+        font = pygame.font.Font('fonts/Roboto-Regular.ttf', 32)
+        font_dev = font.render('Developer:', True, ('white'))
+        font_rect = font_dev.get_rect()
+        font_rect.topleft = (area1.x+10, area1.y+10)
+        canvas.blit(font_dev, font_rect)
+
+        font = pygame.font.Font('fonts/Roboto-Regular.ttf', 24)
+        font_txt = font.render('- João Lucas (0Moon)', True, ('white'))
+        font_rect = font_txt.get_rect()
+        font_rect.topleft = (area1.x+50, area1.y+70)
+        canvas.blit(font_txt, font_rect)
+
+        font = pygame.font.Font('fonts/Roboto-Regular.ttf', 32)
+        font_link = font.render('Link Rep.:', True, ('white'))
+        font_rect = font_link.get_rect()
+        font_rect.topleft = (area3.x+10, area3.y+10)
+        canvas.blit(font_link, font_rect)
+
+        font = pygame.font.Font('fonts/Roboto-Regular.ttf', 24)
+        font_rep = font.render('- https://github.com/LoopMon/Snake_Game', True, ('white'))
+        font_rect = font_rep.get_rect()
+        font_rect.topleft = (area3.x+50, area3.y+70)
+        canvas.blit(font_rep, font_rect)
+
+        font = pygame.font.Font('fonts/Roboto-Regular.ttf', 24)
+        font_back = font.render('[Esc] Back', True, ('white'))
+        font_rect = font_back.get_rect()
+        font_rect.bottomleft = (20, HEIGHT-20)
         canvas.blit(font_back, font_rect)
 
     pygame.display.update()
